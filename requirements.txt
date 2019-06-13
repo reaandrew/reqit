@@ -1,0 +1,10 @@
+pylint
+coverage
+pytest
+pytest-cov
+pytest-html
+pytest-watch
+black
+ruamel.yaml
+requests
+humanize
