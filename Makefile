@@ -10,7 +10,7 @@ format:
 
 .PHONY: test
 test:
-	pytest --cov-report html --cov-report xml --cov-report annotate  --cov=reqit --html testreport.html --self-contained-html test/*
+	pytest --show-capture all --cov-report html --cov-report xml --cov-report annotate  --cov=reqit --html testreport.html --self-contained-html test/*
 
 .PHONY: lint
 lint:

@@ -1,0 +1,10 @@
+---
+type: http
+method: POST
+url: https://postman-echo.com/post?foo1=bar1&foo2=bar2
+headers:
+  X-SOMETHING: Boom
+---
+{
+  "a":{{something}}
+}

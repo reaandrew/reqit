@@ -1,17 +1,12 @@
 import sys
 import json
+import re
 
 from ruamel import yaml
 import requests
-import humanize
 
-
-def print_row(message, value):
-    print("{0:>30}: {1:<}".format(message, value))
-
-
-def print_header(title):
-    print("\033[1m{}\033[0m".format(title))
+from reqit.models import Result
+from reqit.printers import StdOutPrinter
 
 
 def main():
@@ -31,27 +26,13 @@ def main():
             data=payload,
         )
 
-        print_header("Response Info")
-        print_row("Method", response.request.method)
-        print_row("Status", response.status_code)
-        print_row(
-            "Elapsed time", "{} ms".format(int(response.elapsed.total_seconds() * 1000))
-        )
-        print_row("Size", humanize.naturalsize(len(response.content)))
-        print_row("Encoding", response.encoding)
-        print_header("Request Headers")
-        for key, value in response.request.headers.items():
-            print_row(key, value)
-        print_header("Response Headers")
-        for key, value in response.headers.items():
-            print_row(key, value)
+        if payload is not None:
+            matches = re.findall("\{\{[\w]+\}\}", str(payload))
+            print(matches)
 
-        print_header("Cookies")
-        for key, value in response.cookies.items():
-            print_row(key, value)
-
-        print_header("Data")
-        print(response.content)
+        result = Result(response)
+        printer = StdOutPrinter()
+        printer.print(result)
 
 
 if __name__ == "__main__":
