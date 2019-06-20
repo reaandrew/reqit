@@ -1,4 +1,6 @@
 pylint
+autoflake
+autopep8
 coverage
 pytest
 pytest-cov
@@ -9,3 +11,5 @@ ruamel.yaml
 requests
 humanize
 Faker
+cryptography
+astroid

@@ -7,9 +7,10 @@ import requests
 
 from reqit.models import Result
 from reqit.printers import StdOutPrinter
+from reqit.security import generate_keys
 
 
-def main():
+def existing():
     with open(sys.argv[1], "r+") as yaml_stream:
         data = list(yaml.load_all(yaml_stream, Loader=yaml.RoundTripLoader))
         properties = data[0]
@@ -33,6 +34,30 @@ def main():
         result = Result(response)
         printer = StdOutPrinter()
         printer.print(result)
+
+
+def main():
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Process some integers.")
+    parser.add_argument(
+        "integers",
+        metavar="N",
+        type=int,
+        nargs="+",
+        help="an integer for the accumulator",
+    )
+    parser.add_argument(
+        "--sum",
+        dest="accumulate",
+        action="store_const",
+        const=sum,
+        default=max,
+        help="sum the integers (default: find the max)",
+    )
+
+    args = parser.parse_args()
+    print(args.accumulate(args.integers))
 
 
 if __name__ == "__main__":
