@@ -1,12 +1,17 @@
 import humanize
+import json
 
 
 class StdOutPrinter:
     def print_row(self, message, value):
+        if value is None:
+            value = ""
         print("{0:>30}: {1:<}".format(message, value))
 
     def print_header(self, title):
-        print("\033[1m{}\033[0m".format(title))
+        print()
+        print("{}".format(title))
+        print()
 
     def visit(self, response):
         self.print_header("Response Info")
@@ -20,16 +25,24 @@ class StdOutPrinter:
         self.print_header("Request Headers")
         for key, value in response.request.headers.items():
             self.print_row(key, value)
+
         self.print_header("Response Headers")
         for key, value in response.headers.items():
             self.print_row(key, value)
 
         self.print_header("Cookies")
+        if len(response.cookies) == 0:
+            print("No cookies")
+
         for key, value in response.cookies.items():
             self.print_row(key, value)
-
         self.print_header("Data")
-        print(response.content)
+
+        try:
+            parsed = json.loads(response.content.decode("utf-8"))
+            print(json.dumps(parsed, indent=4, sort_keys=True))
+        except:
+            print(response.content.decode("utf-8"))
 
     def print(self, result):
         result.accept(self)

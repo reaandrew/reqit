@@ -12,3 +12,4 @@ requests
 humanize
 Faker
 astroid
+Jinja2

@@ -1,6 +1,6 @@
 ---
 type: http
-method: POST
+method: GET
 url: https://postman-echo.com/post?foo1=bar1&foo2=bar2
 headers:
   X-SOMETHING: Boom
