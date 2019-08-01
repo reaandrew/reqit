@@ -18,7 +18,7 @@ request:
   verify: false
   pretty: true
   before:
-    - ./get-reference-data-badges.yml
+    - ./get-reference-data.yml
 ---
 {
   "name":"barney",
@@ -45,5 +45,27 @@ func TestSimpleRequest(t *testing.T) {
 
 	t.Run("request URL is https://somewhere", func(t *testing.T) {
 		assert.Equal(t, httpClient.Request().RequestObject.URL, "https://somewhere")
+	})
+
+	t.Run("request Headers has X-SOMETHING Boom", func(t *testing.T) {
+		assert.Equal(t, httpClient.Request().RequestObject.Headers["X-SOMETHING"], "Boom")
+	})
+
+	t.Run("request Headers has Content-Type application/json", func(t *testing.T) {
+		assert.Equal(t, httpClient.Request().RequestObject.Headers["Content-Type"], "application/json")
+	})
+
+	t.Run("request verify false", func(t *testing.T) {
+		assert.False(t, httpClient.Request().RequestObject.Verify)
+	})
+
+	t.Run("request pretty true", func(t *testing.T) {
+		assert.True(t, httpClient.Request().RequestObject.Pretty)
+	})
+
+	t.Run("request before contains ./get-reference-data.yml", func(t *testing.T) {
+		assert.Len(t, httpClient.Request().RequestObject.Before, 1)
+
+		assert.Contains(t, httpClient.Request().RequestObject.Before, "./get-reference-data.yml")
 	})
 }

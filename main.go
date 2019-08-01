@@ -15,10 +15,14 @@ type ReqitRequest struct {
 }
 
 type ReqitRequestData struct {
-	Data   []byte `yaml:"data"`
-	Type   string `yaml:"type"`
-	Method string `yaml:"method"`
-	URL    string `yaml:"url"`
+	Data    []byte            `yaml:"data" json:"data"`
+	Type    string            `yaml:"type" json:"type"`
+	Method  string            `yaml:"method" json:"method"`
+	URL     string            `yaml:"url" json:"url"`
+	Headers map[string]string `yaml:"headers"`
+	Verify  bool              `yaml:"verify"`
+	Pretty  bool              `yaml:"pretty"`
+	Before  []string          `yaml:"before"`
 }
 
 type ReqitResult struct {
