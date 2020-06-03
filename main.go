@@ -2,88 +2,26 @@ package main
 
 import (
 	"bufio"
-	"fmt"
+	"errors"
 	"log"
 	"os"
 	"strings"
 
+	schmokin "github.com/reaandrew/schmokin/core"
+	"github.com/reaandrew/schmokin/fileio"
+	"github.com/reaandrew/schmokin/http"
+	"github.com/reaandrew/schmokin/reporters"
+	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
 )
 
-type ReqitRequest struct {
-	RequestObject ReqitRequestData `yaml:"request"`
-}
+var (
+	CommitHash string
+	Version    string
+	BuildTime  string
+)
 
-type ReqitRequestData struct {
-	Data    []byte            `yaml:"data" json:"data"`
-	Type    string            `yaml:"type" json:"type"`
-	Method  string            `yaml:"method" json:"method"`
-	URL     string            `yaml:"url" json:"url"`
-	Headers map[string]string `yaml:"headers"`
-	Verify  bool              `yaml:"verify"`
-	Pretty  bool              `yaml:"pretty"`
-	Before  []string          `yaml:"before"`
-}
-
-type ReqitResult struct {
-}
-
-type HttpClient interface {
-	Execute(request ReqitRequest) ReqitResult
-}
-
-type FakeHTTPClient struct {
-	lastRequest ReqitRequest
-}
-
-func (self *FakeHTTPClient) Execute(request ReqitRequest) ReqitResult {
-	self.lastRequest = request
-	return ReqitResult{}
-}
-
-func (self *FakeHTTPClient) Request() ReqitRequest {
-	return self.lastRequest
-}
-
-type RequestWithAssertions struct {
-	request ReqitRequest
-}
-
-func (self RequestWithAssertions) IsOfType(requestType string) bool {
-	result := self.request.RequestObject.Type == requestType
-	if !result {
-		log.Println(fmt.Sprintf("type = %s", self.request.RequestObject.Type))
-	}
-	return result
-}
-
-func CreateFakeHTTPClient() *FakeHTTPClient {
-	return &FakeHTTPClient{}
-}
-
-type FakeRequestReader struct {
-	data string
-}
-
-func (self FakeRequestReader) Read() string {
-	return self.data
-}
-
-func CreateFakeRequestReader(data string) FakeRequestReader {
-	return FakeRequestReader{
-		data: data,
-	}
-}
-
-type ReqitRequestReader interface {
-	Read() string
-}
-
-type ReqitClient struct {
-	httpClient HttpClient
-}
-
-func (self ReqitClient) Execute(reader ReqitRequestReader) ReqitResult {
+func existing(client schmokin.HTTPClient, reader schmokin.RequestReader) schmokin.Result {
 	reqitData := reader.Read()
 	stringReader := strings.NewReader(reqitData)
 	scanner := bufio.NewScanner(stringReader)
@@ -107,7 +45,7 @@ func (self ReqitClient) Execute(reader ReqitRequestReader) ReqitResult {
 		line++
 	}
 
-	requestObject := ReqitRequest{}
+	requestObject := schmokin.Request{}
 	dataToDecode := strings.Join(request, "\n")
 	err := yaml.Unmarshal([]byte(dataToDecode), &requestObject)
 
@@ -116,38 +54,36 @@ func (self ReqitClient) Execute(reader ReqitRequestReader) ReqitResult {
 	}
 	requestObject.RequestObject.Data = []byte(strings.Join(data, "\n"))
 
-	return self.httpClient.Execute(requestObject)
+	return client.Execute(requestObject)
 }
 
-func CreateReqitClient(httpClient HttpClient) ReqitClient {
-	return ReqitClient{
-		httpClient: httpClient,
+func Execute(args []string) {
+	app := cli.NewApp()
+	app.Name = "boom"
+	app.Version = Version
+	app.Metadata = map[string]interface{}{}
+	app.Metadata["CommitHash"] = CommitHash
+	app.Metadata["BuildTime"] = BuildTime
+	app.Usage = "Schmokin"
+	app.Action = func(c *cli.Context) error {
+		filepath := c.Args().Get(0)
+		if filepath == "" {
+			return errors.New("Filepath required")
+		}
+		client := http.DefaultHTTPClient{}
+		result := existing(client, fileio.FileRequestReader{
+			Path: filepath,
+		})
+		reporters.CliReporter{}.Execute(result)
+		return nil
+	}
+
+	err := app.Run(args)
+	if err != nil {
+		log.Fatal(err)
 	}
 }
 
 func main() {
-	f, _ := os.Open("sample2.yml")
-	scanner := bufio.NewScanner(f)
-	request := []string{}
-	data := []string{}
-	line := 0
-	setData := false
-	for scanner.Scan() {
-		lineContent := scanner.Text()
-		if line > 0 && lineContent == "---" {
-			setData = true
-		}
-
-		if !setData {
-			request = append(request, lineContent)
-		} else {
-			if lineContent != "---" {
-				data = append(data, lineContent)
-			}
-		}
-		line++
-	}
-
-	fmt.Println(strings.Join(request, "\n"))
-	fmt.Println(data)
+	Execute(os.Args)
 }

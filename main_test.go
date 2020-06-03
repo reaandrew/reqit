@@ -3,69 +3,15 @@ package main_test
 import (
 	"testing"
 
-	. "github.com/reaandrew/reqit"
-	"github.com/stretchr/testify/assert"
+	. "github.com/reaandrew/schmokin"
 )
 
-var simpleRequest = `---
-request: 
-  type: http
-  method: POST
-  url: https://somewhere
-  headers:
-    X-SOMETHING: Boom
-    Content-Type: application/json
-  verify: false
-  pretty: true
-  before:
-    - ./get-reference-data.yml
----
-{
-  "name":"barney",
-}
-`
+func TestOutputVersion(t *testing.T) {
+	expectedVersion := "0.1.0"
+	Version = expectedVersion
+	//cmd := exec.Command("sh", "-c", "echo stdout; echo 1>&2 stderr")
 
-func TestSimpleRequest(t *testing.T) {
-	httpClient := CreateFakeHTTPClient()
-	reqit := CreateReqitClient(httpClient)
-	reader := CreateFakeRequestReader(simpleRequest)
-	result := reqit.Execute(reader)
+	//check if the app exists first and fail the build if it does not
 
-	t.Run("result is not nil", func(t *testing.T) {
-		assert.NotNil(t, result)
-	})
-
-	t.Run("request type is http", func(t *testing.T) {
-		assert.Equal(t, httpClient.Request().RequestObject.Type, "http")
-	})
-
-	t.Run("request method is POST", func(t *testing.T) {
-		assert.Equal(t, httpClient.Request().RequestObject.Method, "POST")
-	})
-
-	t.Run("request URL is https://somewhere", func(t *testing.T) {
-		assert.Equal(t, httpClient.Request().RequestObject.URL, "https://somewhere")
-	})
-
-	t.Run("request Headers has X-SOMETHING Boom", func(t *testing.T) {
-		assert.Equal(t, httpClient.Request().RequestObject.Headers["X-SOMETHING"], "Boom")
-	})
-
-	t.Run("request Headers has Content-Type application/json", func(t *testing.T) {
-		assert.Equal(t, httpClient.Request().RequestObject.Headers["Content-Type"], "application/json")
-	})
-
-	t.Run("request verify false", func(t *testing.T) {
-		assert.False(t, httpClient.Request().RequestObject.Verify)
-	})
-
-	t.Run("request pretty true", func(t *testing.T) {
-		assert.True(t, httpClient.Request().RequestObject.Pretty)
-	})
-
-	t.Run("request before contains ./get-reference-data.yml", func(t *testing.T) {
-		assert.Len(t, httpClient.Request().RequestObject.Before, 1)
-
-		assert.Contains(t, httpClient.Request().RequestObject.Before, "./get-reference-data.yml")
-	})
+	Execute([]string{""})
 }
