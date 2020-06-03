@@ -1,48 +1,37 @@
 package reporters
 
 import (
-	"fmt"
 	"os"
-	"strings"
 	"text/template"
 
-	schmokin "github.com/reaandrew/schmokin/core"
+	"github.com/reaandrew/reqit/core"
 )
 
-type CliReportViewModel struct {
-	Headers map[string]string
-	Timings map[string]string
+type Section struct {
+	Title string
+	Items map[string]string
 }
 
-func mapViewModel(result schmokin.Result) CliReportViewModel {
+type CliReportViewModel struct {
+	Sections []Section
+}
+
+func mapViewModel(result core.Result) CliReportViewModel {
 	viewModel := CliReportViewModel{
-		Headers: map[string]string{},
-		Timings: map[string]string{},
+		Sections: []Section{},
 	}
 
-	var paddingLength int
-
-	for key, _ := range result.Headers {
-		if len(key) > paddingLength {
-			paddingLength = len(key)
-		}
-	}
-	if paddingLength < 20 {
-		paddingLength = 20
+	timings := Section{
+		Title: "Timings",
+		Items: map[string]string{},
 	}
 
-	format := fmt.Sprintf("%%-%dv", paddingLength)
-
-	for key, value := range result.Headers {
-		paddedKey := fmt.Sprintf(format, key)
-		viewModel.Headers[paddedKey] = strings.Join(value, ",")
-	}
-
-	viewModel.Timings[fmt.Sprintf(format, "Connect")] = result.Timings.ConnectDone.String()
-	viewModel.Timings[fmt.Sprintf(format, "DNS Lookup")] = result.Timings.DnsDone.String()
-	viewModel.Timings[fmt.Sprintf(format, "TLS Handshake")] = result.Timings.TlsHandshakeDone.String()
-	viewModel.Timings[fmt.Sprintf(format, "Time to first byte")] = result.Timings.FirstByteDone.String()
-	viewModel.Timings[fmt.Sprintf(format, "Time to complete")] = result.Timings.Complete.String()
+	timings.Items["Connect"] = result.Timings.ConnectDone.String()
+	timings.Items["DNS Lookup"] = result.Timings.DnsDone.String()
+	timings.Items["TLS Handshake"] = result.Timings.TlsHandshakeDone.String()
+	timings.Items["Time to first byte"] = result.Timings.FirstByteDone.String()
+	timings.Items["Time to complete"] = result.Timings.Complete.String()
+	viewModel.Sections = append(viewModel.Sections, timings)
 
 	return viewModel
 }
@@ -50,7 +39,7 @@ func mapViewModel(result schmokin.Result) CliReportViewModel {
 type CliReporter struct {
 }
 
-func (self CliReporter) Execute(result schmokin.Result) {
+func (self CliReporter) Execute(result core.Result) {
 	reportTemplate := `
 Reponse Headers
 ----------------------------------

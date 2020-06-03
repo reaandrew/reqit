@@ -1,4 +1,4 @@
-package schmokin
+package core
 
 import "time"
 

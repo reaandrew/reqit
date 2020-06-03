@@ -8,9 +8,9 @@ import (
 	"testing"
 	"time"
 
-	schmokin "github.com/reaandrew/schmokin/core"
-	"github.com/reaandrew/schmokin/fake"
-	schmokinHTTP "github.com/reaandrew/schmokin/http"
+	"github.com/reaandrew/reqit/core"
+	"github.com/reaandrew/reqit/fake"
+	reqitHTTP "github.com/reaandrew/reqit/http"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -39,8 +39,8 @@ func TestDefaultHttpClient(t *testing.T) {
 	}))
 	defer server.Close()
 
-	httpClient := schmokinHTTP.CreateDefaultHTTPClient()
-	schmokin := schmokin.CreateClient(httpClient)
+	httpClient := reqitHTTP.CreateDefaultHTTPClient()
+	schmokin := core.CreateClient(httpClient)
 	schmokinRequest := strings.Replace(request, "$URL", server.URL, -1)
 	reader := fake.CreateFakeRequestReader(schmokinRequest)
 	result := schmokin.Execute(reader)

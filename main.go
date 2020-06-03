@@ -7,10 +7,10 @@ import (
 	"os"
 	"strings"
 
-	schmokin "github.com/reaandrew/schmokin/core"
-	"github.com/reaandrew/schmokin/fileio"
-	"github.com/reaandrew/schmokin/http"
-	"github.com/reaandrew/schmokin/reporters"
+	"github.com/reaandrew/reqit/core"
+	"github.com/reaandrew/reqit/fileio"
+	"github.com/reaandrew/reqit/http"
+	"github.com/reaandrew/reqit/reporters"
 	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
 )
@@ -21,7 +21,7 @@ var (
 	BuildTime  string
 )
 
-func existing(client schmokin.HTTPClient, reader schmokin.RequestReader) schmokin.Result {
+func existing(client core.HTTPClient, reader core.RequestReader) core.Result {
 	reqitData := reader.Read()
 	stringReader := strings.NewReader(reqitData)
 	scanner := bufio.NewScanner(stringReader)
@@ -45,7 +45,7 @@ func existing(client schmokin.HTTPClient, reader schmokin.RequestReader) schmoki
 		line++
 	}
 
-	requestObject := schmokin.Request{}
+	requestObject := core.Request{}
 	dataToDecode := strings.Join(request, "\n")
 	err := yaml.Unmarshal([]byte(dataToDecode), &requestObject)
 

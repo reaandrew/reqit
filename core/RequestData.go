@@ -1,4 +1,4 @@
-package schmokin
+package core
 
 type RequestData struct {
 	Data    []byte

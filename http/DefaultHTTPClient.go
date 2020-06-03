@@ -7,13 +7,13 @@ import (
 	"net/http/httptrace"
 	"time"
 
-	schmokin "github.com/reaandrew/schmokin/core"
+	"github.com/reaandrew/reqit/core"
 )
 
 type DefaultHTTPClient struct {
 }
 
-func (self DefaultHTTPClient) Execute(request schmokin.Request) schmokin.Result {
+func (self DefaultHTTPClient) Execute(request core.Request) core.Result {
 	client := &http.Client{}
 
 	req, err := http.NewRequest(request.RequestObject.Method,
@@ -46,11 +46,11 @@ func (self DefaultHTTPClient) Execute(request schmokin.Request) schmokin.Result 
 		panic(err)
 	} else {
 		doneDone = time.Since(start)
-		result := schmokin.NewResult()
+		result := core.NewResult()
 		for key, value := range response.Header {
 			result.Headers[key] = value
 		}
-		result.Timings = schmokin.Timings{
+		result.Timings = core.Timings{
 			ConnectDone:      connectDone,
 			DnsDone:          dnsDone,
 			FirstByteDone:    firstByteDone,
@@ -61,6 +61,6 @@ func (self DefaultHTTPClient) Execute(request schmokin.Request) schmokin.Result 
 	}
 }
 
-func CreateDefaultHTTPClient() schmokin.HTTPClient {
+func CreateDefaultHTTPClient() core.HTTPClient {
 	return DefaultHTTPClient{}
 }
